@@ -94,7 +94,37 @@ na Vercel w ciągu minuty — nie musisz nic klikać.
 
 ---
 
-## Praca lokalna (opcjonalnie, dla programisty)
+## Krok 4 — Hasło dostępu do aplikacji
+
+Aplikacja jest chroniona jednym wspólnym hasłem dla całej firmy — każdy, kto
+wpisze poprawne hasło w przeglądarce, ma dostęp przez kolejne 30 dni (potem
+trzeba wpisać je ponownie).
+
+1. W Vercel wejdź w swój projekt → **Settings → Environment Variables**.
+2. Dodaj nową zmienną:
+
+   | Name | Value |
+   |---|---|
+   | `APP_PASSWORD` | wybrane przez Ciebie hasło, np. `elewacje2026` |
+
+3. Zaznacz **Production and Preview** jako środowiska.
+4. Zapisz, a potem wejdź w zakładkę **Deployments** → przy najnowszym
+   deploymencie kliknij **⋯ → Redeploy** (zmienne środowiskowe działają
+   tylko od następnego builda, nie wstecznie).
+
+Od teraz każdy wchodzący na link aplikacji zobaczy ekran z prośbą o hasło.
+Jeśli zapomnisz ustawić `APP_PASSWORD`, aplikacja **nie blokuje dostępu** —
+to zabezpieczenie przed przypadkowym zablokowaniem samego siebie.
+
+> Jeśli chcesz zmienić hasło w przyszłości, po prostu zmień wartość
+> `APP_PASSWORD` w Vercel i zrób redeploy — osoby, które były już
+> zalogowane starym hasłem, zostaną poproszone o nowe przy najbliższej
+> wizycie po wygaśnięciu ciasteczka (lub możesz je wylogować wcześniej,
+> czyszcząc dane strony w przeglądarce).
+
+---
+
+
 
 ```bash
 npm install
@@ -114,10 +144,15 @@ elewacje-crm/
 ├── supabase/
 │   └── schema.sql          ← struktura bazy danych (wklejana w Supabase)
 ├── src/
+│   ├── middleware.ts        ← sprawdza hasło dostępu przy każdym żądaniu
 │   ├── app/
 │   │   ├── layout.tsx      ← główny layout + czcionki
 │   │   ├── page.tsx        ← strona główna (lista klientów, filtry)
-│   │   └── globals.css     ← kolory, style globalne
+│   │   ├── globals.css     ← kolory, style globalne
+│   │   ├── login/
+│   │   │   └── page.tsx    ← ekran logowania hasłem
+│   │   └── api/login/
+│   │       └── route.ts    ← sprawdza hasło, ustawia ciasteczko
 │   ├── components/
 │   │   ├── KartaZlecenia.tsx     ← karta jednego klienta na liście
 │   │   ├── PasekWarstw.tsx       ← pasek 5 etapów (klikalne segmenty)
