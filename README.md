@@ -172,6 +172,14 @@ Tak — kolory są zdefiniowane na górze pliku `src/app/globals.css`
 (zmienne typu `--cegla`, `--grafit` itd.), a tytuł strony w
 `src/app/layout.tsx`.
 
+**Czy mogę zmienić logo?**
+Tak. Logo znajduje się w dwóch miejscach:
+- `public/logo.png` — logo widoczne w nagłówku strony i na ekranie logowania
+- `src/app/icon.png` — ikonka widoczna w karcie przeglądarki (favicon)
+
+Żeby zmienić logo, po prostu zastąp te dwa pliki nowymi (zachowując te
+same nazwy: `logo.png` i `icon.png`).
+
 **Czy da się dodać więcej etapów albo zmienić ich nazwy?**
 Tak. Etykiety etapów są w `src/lib/types.ts` (`ETAPY_LABELS`,
 `ETAPY_SKRÓT`). Dodanie nowego etapu wymaga też dodania nowej kolumny w

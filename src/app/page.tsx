@@ -150,9 +150,12 @@ export default function StronaGlowna() {
   return (
     <main className="strona">
       <header className="naglowek">
-        <div className="naglowek__tytul">
-          <span className="naglowek__eyebrow">Elewacje · Zarządzanie zleceniami</span>
-          <h1>Lista klientów</h1>
+        <div className="naglowek__marka">
+          <img src="/logo.png" alt="ModernFas" className="naglowek__logo" />
+          <div className="naglowek__tytul">
+            <span className="naglowek__eyebrow">ModernFas · Zarządzanie zleceniami</span>
+            <h1>Lista klientów</h1>
+          </div>
         </div>
         <button
           type="button"
@@ -270,6 +273,22 @@ export default function StronaGlowna() {
           gap: 16px;
           margin-bottom: 24px;
           flex-wrap: wrap;
+        }
+
+        .naglowek__marka {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+
+        .naglowek__logo {
+          width: 48px;
+          height: 48px;
+          border-radius: var(--radius);
+          background: var(--grafit);
+          padding: 6px;
+          flex-shrink: 0;
+          object-fit: contain;
         }
 
         .naglowek__eyebrow {
@@ -444,6 +463,10 @@ export default function StronaGlowna() {
           }
           .naglowek__tytul h1 {
             font-size: 24px;
+          }
+          .naglowek__logo {
+            width: 38px;
+            height: 38px;
           }
         }
       `}</style>

@@ -42,7 +42,8 @@ function FormularzLogowania() {
     <div className="ekran">
       <form onSubmit={obsluzWyslanie} className="karta">
         <div className="karta__pas" />
-        <span className="eyebrow">Elewacje · CRM</span>
+        <img src="/logo.png" alt="ModernFas" className="logo" />
+        <span className="eyebrow">ModernFas · CRM</span>
         <h1>Dostęp chroniony</h1>
         <p className="opis">Wpisz hasło, aby zobaczyć listę zleceń.</p>
 
@@ -100,6 +101,17 @@ function FormularzLogowania() {
           );
         }
 
+        .logo {
+          width: 56px;
+          height: 56px;
+          border-radius: var(--radius);
+          background: var(--grafit);
+          padding: 7px;
+          object-fit: contain;
+          margin-top: 18px;
+          align-self: flex-start;
+        }
+
         .eyebrow {
           font-family: var(--font-mono);
           font-size: 11px;
@@ -107,7 +119,7 @@ function FormularzLogowania() {
           letter-spacing: 0.06em;
           color: var(--cegla);
           font-weight: 600;
-          margin-top: 8px;
+          margin-top: 14px;
         }
 
         h1 {
