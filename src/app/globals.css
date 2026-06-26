@@ -1,0 +1,99 @@
+/* ============================================================
+   ELEWACJE CRM — design tokens
+   Paleta inspirowana materiałami elewacyjnymi:
+   tynk / beton architektoniczny / cegła klinkierowa / grafit okładzin
+   ============================================================ */
+
+:root {
+  --tynk: #ece6d8;        /* tło — ciepły tynk */
+  --tynk-ciemny: #ddd4c1; /* karty / wgłębienia */
+  --beton: #b9b3a4;       /* linie, obramowania */
+  --grafit: #2b2a28;      /* tekst główny, nagłówki */
+  --grafit-2: #54514c;    /* tekst drugorzędny */
+  --cegla: #b5552c;       /* akcent — terakota / klinkier */
+  --cegla-ciemna: #97431f;
+  --zielen: #51724f;      /* zrealizowane / sukces */
+  --zielen-tlo: #e1e8db;
+  --bursztyn: #a8762a;    /* w trakcie / uwaga */
+  --bursztyn-tlo: #ede3cb;
+  --czerwien: #a13a2e;    /* usuwanie / błąd */
+  --bialy: #fbf9f4;
+
+  --font-display: "Archivo", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+
+  --radius: 3px;
+  --shadow-card: 0 1px 0 rgba(43, 42, 40, 0.06), 0 1px 3px rgba(43, 42, 40, 0.04);
+  --shadow-pop: 0 8px 24px rgba(43, 42, 40, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: var(--tynk);
+  color: var(--grafit);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  /* delikatna tekstura "tynku" — subtelny szum, bez przesady */
+  background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(43, 42, 40, 0.035) 1px,
+      transparent 0
+    );
+  background-size: 14px 14px;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+::selection {
+  background: var(--cegla);
+  color: var(--bialy);
+}
+
+:focus-visible {
+  outline: 2px solid var(--cegla);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--beton);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
