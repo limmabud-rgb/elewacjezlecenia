@@ -1,49 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
+import { tokenJestPoprawny } from "@/lib/sesja";
 
 /**
- * Prosta ochrona hasłem dla całej aplikacji.
+ * Ochrona hasłem dla całej aplikacji.
  *
- * Działanie: jeśli przeglądarka nie ma ciasteczka "crm_auth" z poprawną
- * wartością, każde żądanie (oprócz strony logowania i jej API) jest
- * przekierowywane na /login. Po wpisaniu poprawnego hasła ciasteczko
- * jest ustawiane na 30 dni, więc nie trzeba logować się przy każdej wizycie.
- *
- * Hasło NIE jest zapisane w kodzie — pochodzi ze zmiennej środowiskowej
- * APP_PASSWORD (ustawianej w Vercel → Settings → Environment Variables).
+ * Hasło samo jest sprawdzane (i może być zmieniane) w Supabase — patrz
+ * supabase/schema.sql (tabela app_auth, funkcje sprawdz_haslo i
+ * zmien_haslo). Middleware nie zna hasła — sprawdza tylko, czy
+ * przeglądarka ma podpisany token sesji wystawiony po udanym
+ * zalogowaniu (patrz src/lib/sesja.ts).
  */
 
-const CIASTECZKO = "crm_auth";
+const CIASTECZKO = "crm_sesja";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Strona logowania i jej endpoint API muszą być zawsze dostępne,
-  // inaczej nie da się wpisać hasła.
-  if (pathname === "/login" || pathname === "/api/login") {
+  // Strona logowania i jej endpointy API muszą być zawsze dostępne,
+  // inaczej nie da się wpisać hasła ani go zmienić.
+  if (
+    pathname === "/login" ||
+    pathname === "/api/login" ||
+    pathname === "/api/zmien-haslo"
+  ) {
     return NextResponse.next();
   }
 
   // Pliki statyczne Next.js (CSS, JS, obrazy) — przepuszczamy,
   // żeby strona logowania mogła się poprawnie wyświetlić.
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
-  ) {
+  if (pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
     return NextResponse.next();
   }
 
-  const haslo = process.env.APP_PASSWORD;
+  const token = request.cookies.get(CIASTECZKO)?.value;
 
-  // Jeśli administrator nie ustawił hasła, nie blokujemy aplikacji —
-  // (bezpieczniejsze byłoby zablokować, ale wtedy ktoś, kto zapomni
-  // ustawić zmienną środowiskową, zablokowałby sam siebie ze swojej apki).
-  if (!haslo) {
-    return NextResponse.next();
-  }
-
-  const ciasteczko = request.cookies.get(CIASTECZKO)?.value;
-
-  if (ciasteczko === haslo) {
+  if (await tokenJestPoprawny(token)) {
     return NextResponse.next();
   }
 

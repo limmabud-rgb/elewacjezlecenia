@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { EtapKey, StatusRealizacji, Zlecenie, ZlecenieDraft } from "@/lib/types";
 import KartaZlecenia from "@/components/KartaZlecenia";
@@ -166,6 +167,10 @@ export default function StronaGlowna() {
         </button>
       </header>
 
+      <div className="ustawienia-link">
+        <Link href="/zmiana-hasla">Zmień hasło dostępu</Link>
+      </div>
+
       <section className="statystyki">
         <div className="staty-kafel">
           <span className="staty-kafel__liczba">{zlecenia.length}</span>
@@ -321,6 +326,23 @@ export default function StronaGlowna() {
 
         .btn-nowe:hover {
           background: var(--cegla);
+        }
+
+        .ustawienia-link {
+          text-align: right;
+          margin: -10px 0 18px;
+        }
+
+        .ustawienia-link a {
+          font-family: var(--font-mono);
+          font-size: 11.5px;
+          color: var(--grafit-2);
+          text-decoration: none;
+        }
+
+        .ustawienia-link a:hover {
+          color: var(--cegla);
+          text-decoration: underline;
         }
 
         .statystyki {

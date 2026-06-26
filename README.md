@@ -17,6 +17,23 @@ komputer w biurze), a sama aplikacja jest hostowana na Vercel.
 
 ---
 
+## Aktualizujesz istniejące wdrożenie?
+
+Jeśli już masz tę aplikację działającą (z hasłem ustawionym przez zmienną
+`APP_PASSWORD`) i wgrywasz tę nowszą wersję, zmiana hasła przeniosła się do
+Supabase. Zrób dodatkowo:
+
+1. W Supabase → **SQL Editor** ponownie wklej i uruchom cały plik
+   `supabase/schema.sql` (jest bezpieczny do wielokrotnego uruchamiania —
+   nie usunie istniejących zleceń, tylko doda nową tabelę `app_auth`).
+   Przed uruchomieniem zamień w nim `'zmien-to-haslo'` na hasło, które
+   chcesz mieć ustawione na start.
+2. W Vercel dodaj nową zmienną `SESSION_SECRET` (opis w Kroku 4 poniżej) —
+   stara zmienna `APP_PASSWORD` nie jest już używana, możesz ją usunąć.
+3. Zrób redeploy.
+
+---
+
 ## Krok 1 — Supabase (baza danych)
 
 1. Wejdź na [supabase.com](https://supabase.com) i załóż darmowe konto (jeśli
@@ -98,29 +115,53 @@ na Vercel w ciągu minuty — nie musisz nic klikać.
 
 Aplikacja jest chroniona jednym wspólnym hasłem dla całej firmy — każdy, kto
 wpisze poprawne hasło w przeglądarce, ma dostęp przez kolejne 30 dni (potem
-trzeba wpisać je ponownie).
+trzeba wpisać je ponownie). Hasło jest przechowywane w Supabase (jako hash,
+nigdy jako czysty tekst) i **można je zmienić bezpośrednio w aplikacji**, bez
+dotykania Vercela czy Supabase — wystarczy znać aktualne hasło.
+
+### Hasło startowe
+
+Plik `supabase/schema.sql` ustawia hasło startowe na `zmien-to-haslo`. Zanim
+go uruchomisz w Supabase (Krok 1), otwórz ten plik i zamień
+`'zmien-to-haslo'` na własne hasło startowe — albo zostaw jak jest i zmień
+je od razu po pierwszym zalogowaniu, na ekranie **„Zmień hasło dostępu"**
+(link w prawym górnym rogu listy klientów).
+
+### Zmiana hasła w przyszłości
+
+1. Wejdź na stronę aplikacji i zaloguj się.
+2. Kliknij **„Zmień hasło dostępu"** w prawym górnym rogu.
+3. Podaj aktualne hasło i nowe hasło (dwa razy, dla potwierdzenia).
+4. Gotowe — od tego momentu obowiązuje nowe hasło dla wszystkich. Osoby,
+   które są już zalogowane na innych urządzeniach, zostaną poproszone o
+   nowe hasło po wygaśnięciu ich sesji (do 30 dni) — jeśli chcesz, żeby
+   stało się to natychmiast, daj znać, można to rozbudować o wylogowanie
+   wszystkich na raz.
+
+### Konfiguracja techniczna (jednorazowa, przy wdrożeniu)
+
+Mechanizm logowania wymaga jednej dodatkowej zmiennej środowiskowej w
+Vercelu — to **nie jest hasło do aplikacji**, tylko techniczny sekret
+używany do podpisywania sesji (żeby przeglądarka mogła dowieść, że ktoś już
+się zalogował, bez przechowywania samego hasła w ciasteczku).
 
 1. W Vercel wejdź w swój projekt → **Settings → Environment Variables**.
-2. Dodaj nową zmienną:
+2. Dodaj zmienną:
 
    | Name | Value |
    |---|---|
-   | `APP_PASSWORD` | wybrane przez Ciebie hasło, np. `elewacje2026` |
+   | `SESSION_SECRET` | dowolny długi, losowy ciąg znaków (np. 32+ znaków) |
 
-3. Zaznacz **Production and Preview** jako środowiska.
-4. Zapisz, a potem wejdź w zakładkę **Deployments** → przy najnowszym
-   deploymencie kliknij **⋯ → Redeploy** (zmienne środowiskowe działają
-   tylko od następnego builda, nie wstecznie).
+   Możesz taki ciąg wygenerować np. na stronie
+   [generate-secret.vercel.app](https://generate-secret.vercel.app/32) albo
+   komendą `openssl rand -hex 32` w terminalu.
 
-Od teraz każdy wchodzący na link aplikacji zobaczy ekran z prośbą o hasło.
-Jeśli zapomnisz ustawić `APP_PASSWORD`, aplikacja **nie blokuje dostępu** —
-to zabezpieczenie przed przypadkowym zablokowaniem samego siebie.
+3. Zaznacz **Production and Preview** jako środowiska, zapisz.
+4. Wejdź w zakładkę **Deployments** → przy najnowszym deploymencie kliknij
+   **⋯ → Redeploy**.
 
-> Jeśli chcesz zmienić hasło w przyszłości, po prostu zmień wartość
-> `APP_PASSWORD` w Vercel i zrób redeploy — osoby, które były już
-> zalogowane starym hasłem, zostaną poproszone o nowe przy najbliższej
-> wizycie po wygaśnięciu ciasteczka (lub możesz je wylogować wcześniej,
-> czyszcząc dane strony w przeglądarce).
+Ten krok robisz tylko raz, przy wdrożeniu — `SESSION_SECRET` nie zmienia się
+przy zmianie hasła dostępu.
 
 ---
 
@@ -142,25 +183,32 @@ Aplikacja będzie dostępna na `http://localhost:3000`.
 ```
 elewacje-crm/
 ├── supabase/
-│   └── schema.sql          ← struktura bazy danych (wklejana w Supabase)
+│   └── schema.sql          ← struktura bazy + hasło dostępu (wklejana w Supabase)
 ├── src/
-│   ├── middleware.ts        ← sprawdza hasło dostępu przy każdym żądaniu
+│   ├── middleware.ts        ← sprawdza sesję logowania przy każdym żądaniu
 │   ├── app/
 │   │   ├── layout.tsx      ← główny layout + czcionki
 │   │   ├── page.tsx        ← strona główna (lista klientów, filtry)
 │   │   ├── globals.css     ← kolory, style globalne
+│   │   ├── icon.png        ← favicon (logo w karcie przeglądarki)
 │   │   ├── login/
 │   │   │   └── page.tsx    ← ekran logowania hasłem
-│   │   └── api/login/
-│   │       └── route.ts    ← sprawdza hasło, ustawia ciasteczko
+│   │   ├── zmiana-hasla/
+│   │   │   └── page.tsx    ← ekran zmiany hasła dostępu
+│   │   └── api/
+│   │       ├── login/route.ts        ← sprawdza hasło w Supabase, wystawia sesję
+│   │       └── zmien-haslo/route.ts  ← zmienia hasło w Supabase
 │   ├── components/
 │   │   ├── KartaZlecenia.tsx     ← karta jednego klienta na liście
 │   │   ├── PasekWarstw.tsx       ← pasek 5 etapów (klikalne segmenty)
 │   │   ├── BadgeStatus.tsx       ← znacznik "w trakcie / zrealizowana"
 │   │   └── FormularzZlecenia.tsx ← formularz dodawania/edycji
 │   └── lib/
-│       ├── supabaseClient.ts ← połączenie z Supabase
+│       ├── supabaseClient.ts ← połączenie z Supabase (dane klientów)
+│       ├── sesja.ts          ← podpisywanie/weryfikacja tokenu logowania
 │       └── types.ts          ← typy danych
+├── public/
+│   └── logo.png             ← logo widoczne w nagłówku i na logowaniu
 ├── .env.local.example
 └── package.json
 ```
@@ -182,10 +230,18 @@ same nazwy: `logo.png` i `icon.png`).
 
 **Czy da się dodać więcej etapów albo zmienić ich nazwy?**
 Tak. Etykiety etapów są w `src/lib/types.ts` (`ETAPY_LABELS`,
-`ETAPY_SKRÓT`). Dodanie nowego etapu wymaga też dodania nowej kolumny w
+`ETAPY_SKROT`). Dodanie nowego etapu wymaga też dodania nowej kolumny w
 bazie danych (osobne zapytanie SQL — napisz, jeśli potrzebujesz pomocy).
 
 **Czy kilka osób może korzystać z aplikacji jednocześnie?**
 Tak — to jest cały sens połączenia z Supabase. Zmiana zrobiona na telefonie
 ekipy w terenie pojawi się automatycznie na komputerze w biurze (dzięki
 funkcji Realtime włączonej w `schema.sql`).
+
+**Czy hasło jest bezpiecznie przechowane?**
+Tak. Hasło nigdy nie jest zapisane jawnie — w bazie trzyma się tylko jego
+hash (nieodwracalny "odcisk", przez `pgcrypto`/bcrypt), a sama tabela z tym
+hashem jest niedostępna z zewnątrz aplikacji (brak polityk RLS otwierających
+do niej dostęp). Jedyny sposób na sprawdzenie albo zmianę hasła to dwie
+specjalne funkcje SQL, które same weryfikują stare hasło i nigdy nie
+zwracają hasha na zewnątrz.
